@@ -1,4 +1,5 @@
 import smtplib
+import re
 from email.message import EmailMessage
 import os
 from dotenv import load_dotenv
@@ -28,13 +29,19 @@ class ConfigEmail:
             servidor.starttls()
             servidor.login(self.user, self.password)
             print("Login realizado com sucesso!")
+            patron_email = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
             for contaco in diccionario:
+                email = contaco.get("Correo electronico", "")
+                if not patron_email.match(email):
+                    print(f"Correo electrónico inválido, saltando: {email}")
+                    continue
                 mensaje = EmailMessage()
                 mensaje['From'] = EMAIL_USER
-                mensaje['To'] = contaco["Correo electronico"]
+                mensaje['To'] = email
                 mensaje['Subject'] = "Bienvenido a nuestro servicio"
                 mensaje.set_content(f"Hola {contaco['Nombre']} {contaco['Apellidos']},\n\nGracias por registrarte en nuestra plataforma.\n\nSaludos cordiales,\nEl equipo")
                 servidor.send_message(mensaje)
+            servidor.quit()
             return "Correo enviado con éxito!"
         except smtplib.SMTPConnectError as e:
             print(f"Ocurrió un error al conectar con el servidor de correo: {e}")
