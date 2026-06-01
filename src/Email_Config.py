@@ -18,18 +18,18 @@ class ConfigEmail:
         self.password = EMAIL_PASSWORD
 
 
-    def configure_server(self, to, asunto, cuerpo):
+    def configure_server(self, diccionario):
         servidor = smtplib.SMTP(self.host, self.port)
         servidor.starttls()
         servidor.login(self.user, self.password)
         print("Login realizado com sucesso!")
-
-        mensaje = EmailMessage()
-        mensaje['From'] = EMAIL_USER
-        mensaje['To'] = to
-        mensaje['Subject'] = asunto
-        mensaje.set_content(cuerpo)
-        servidor.send_message(mensaje)
+        for contaco in diccionario:
+            mensaje = EmailMessage()
+            mensaje['From'] = EMAIL_USER
+            mensaje['To'] = contaco["Correo electronico"]
+            mensaje['Subject'] = "Bienvenido a nuestro servicio"
+            mensaje.set_content(f"Hola {contaco['Nombre']} {contaco['Apellidos']},\n\nGracias por registrarte en nuestra plataforma.\n\nSaludos cordiales,\nEl equipo")
+            servidor.send_message(mensaje)
         return "Correo enviado con éxito!"
     
 #correo = ConfigEmail()
