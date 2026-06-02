@@ -30,17 +30,26 @@ class ConfigEmail:
             servidor.login(self.user, self.password)
             print("Login realizado com sucesso!")
             patron_email = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+            errores = []
             for contaco in diccionario:
                 email = contaco.get("Correo electronico", "")
                 if not patron_email.match(email):
                     print(f"Correo electrónico inválido, saltando: {email}")
                     continue
-                mensaje = EmailMessage()
-                mensaje['From'] = EMAIL_USER
-                mensaje['To'] = email
-                mensaje['Subject'] = "Bienvenido a nuestro servicio"
-                mensaje.set_content(f"Hola {contaco['Nombre']} {contaco['Apellidos']},\n\nGracias por registrarte en nuestra plataforma.\n\nSaludos cordiales,\nEl equipo")
-                servidor.send_message(mensaje)
+                try:
+                    mensaje = EmailMessage()
+                    mensaje['From'] = EMAIL_USER
+                    mensaje['To'] = email
+                    mensaje['Subject'] = "Bienvenido a nuestro servicio"
+                    mensaje.set_content(f"Hola {contaco['Nombre']} {contaco['Apellidos']},\n\nGracias por registrarte en nuestra plataforma.\n\nSaludos cordiales,\nEl equipo")
+                    servidor.send_message(mensaje)
+                except Exception as e:
+                    print(f"Error al enviar a {email}: {e}")
+                    errores.append((email, str(e)))
+            if errores != []:
+                print(f"Se completó con {len(errores)} error(es):")
+                for email, error in errores:
+                    print(f"  - {email}: {error}")
             servidor.quit()
             return "Correo enviado con éxito!"
         except smtplib.SMTPConnectError as e:
